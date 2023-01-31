@@ -7,12 +7,18 @@ import {
   getDatabase,
   push,
   onValue,
+  child,
+  get,
   set,
   update,
-  ref
+  ref,
+  remove,
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import {
+  getAuth,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
 // Initialize Firebase, database, authentication
 const app = initializeApp(firebaseConfig);
@@ -74,7 +80,7 @@ function adverts() {
         // Sign-out successful.
         alert("Sign-out successful");
       })
-      
+
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
@@ -95,39 +101,73 @@ function adverts() {
     console.log(title.value, category.value, price.value, description.value);
   }
 
+  function removeData(evt) {
+    evt.preventDefault();
+    let dbRef = ref(database);
+    get(child(dbRef, `Adverts/${title.value}`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        remove(ref(database, "Adverts/" + title.value)).then(() => {
+          console.log(`deleted ${title.value}`);
+        });
+      }
+    });
+  }
+
   function findData() {
-    onValue(ref(database, "Adverts/")),
-      (snapshot) => {
-        let advert = snapshot.val();
-        console.log(advert)
-        // for (let i in advert) {
-        //   let ad = advert[i];
+    let adCountRef = ref(database, "Adverts/");
+    onValue(adCountRef, (snapshot) => {
+      let advert = snapshot.val();
+      console.log(advert);
+      for (let i in advert) {
+        let ad = advert[i];
+        // removeData();
 
-        //   //title
-        //   let listItem = document.createElement("li");
-        //   listItem.classList.add("listGroup");
-        //   listItem.textContent = "Pavadinimas: " + ad.Title;
-        //   myAds.appendChild(listItem);
+        //title
+        let listItem = document.createElement("li");
+        listItem.classList.add("listGroup");
+        listItem.textContent = "Pavadinimas: " + ad.Title;
+        myAds.appendChild(listItem);
 
-        //   //Category
-        //   let listItemCateg = document.createElement("li");
-        //   listItemCateg.classList.add("listGroup");
-        //   listItemCateg.textContent = "Kategorija: " + ad.Category;
-        //   myAds.appendChild(listItemCateg);
+        //Category
+        let listItemCateg = document.createElement("li");
+        listItemCateg.classList.add("listGroup");
+        listItemCateg.textContent = "Kategorija: " + ad.Category;
+        myAds.appendChild(listItemCateg);
 
-        //   //Price
-        //   let listItemPrice = document.createElement("li");
-        //   listItemPrice.classList.add("listGroup");
-        //   listItemPrice.textContent = "Kaina: " + ad.Price;
-        //   myAds.appendChild(listItemPrice);
+        //Price
+        let listItemPrice = document.createElement("li");
+        listItemPrice.classList.add("listGroup");
+        listItemPrice.textContent = "Kaina: " + ad.Price;
+        myAds.appendChild(listItemPrice);
 
-        //   //Description:
-        //   let listItemDesc = document.createElement("li");
-        //   listItemDesc.classList.add("listGroup", "description");
-        //   listItemDesc.textContent = "Aprasymas: " + ad.Description;
-        //   myAds.appendChild(listItemDesc);
-        // }
-      };
+        //Description:
+        let listItemDesc = document.createElement("li");
+        listItemDesc.classList.add("listGroup", "description");
+        listItemDesc.textContent = "Aprasymas: " + ad.Description;
+        myAds.appendChild(listItemDesc);
+
+        let deleteAd = document.createElement("img");
+        deleteAd.classList.add("deleteAd");
+        deleteAd.id = "deleteAd";
+        deleteAd.src =
+          "https://www.pngall.com/wp-content/uploads/5/Delete-Red-X-Button-Transparent.png";
+        myAds.appendChild(deleteAd);
+deleteAd.addEventListener("click", removeData());
+        function removeData(evt) {
+          evt.preventDefault();
+          let dbRef = ref(database);
+          get(child(dbRef, `Adverts/${title.value}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+              remove(ref(database, "Adverts/" + title.value)).then(() => {
+                console.log(`deleted ${title.value}`);
+              });
+            }
+          });
+        }
+
+        
+      }
+    });
   }
 }
 
